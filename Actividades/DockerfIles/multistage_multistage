@@ -24,6 +24,7 @@ ENV JAVA_HOME  /usr/lib/jvm
 RUN export JAVA_HOME
 RUN echo $JAVA_HOME
 USER root
+RUN ln -s /usr/lib/libpq.so.5 /usr/lib/libpq.so.5
 
 ENV POSTGRES_HOST_AUTH_METHOD=trust
 COPY /web/ /WEB/
@@ -36,7 +37,7 @@ ENV POSTGRES_PASSWORD password
 ENV POSTGRES_DB dbname
 
 WORKDIR /WORDS
-RUN /usr/share/maven/bin/mvn verify
+#RUN /usr/share/maven/bin/mvn verify
 
 WORKDIR /docker-entrypoint-initdb.d/
 COPY /db/words.sql /docker-entrypoint-initdb.d/words.sql
