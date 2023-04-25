@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
 
 # Imagen final
 FROM ubuntu:latest
-RUN apt install -y libpq5
+#RUN apt install -y libpq5
 # Copiar PostgreSQL, Go, Maven y OpenJDK 8 desde las imágenes anteriores
 COPY --from=db /usr/local/bin /usr/local/bin
 COPY --from=db /usr/local/lib /usr/local/lib
@@ -18,8 +18,11 @@ COPY --from=db /usr/libexec/ /usr/libexec/
 COPY --from=db /usr/lib/postgresql/ /usr/lib/postgresql/
 #COPY --from=db /usr/lib/postgresql/15/bin /usr/lib/postgresql/15/bin
 COPY --from=go /usr/local/go /usr/local/go
-COPY --from=go /usr/share/maven /usr/share/maven
 COPY --from=go /usr/lib/jvm/java-11-openjdk-amd64 /usr/lib/jvm/java-11-openjdk-amd64
+COPY --from=go /usr/share/maven /usr/share/maven
+ENV JAVA_HOME  /usr/lib/jvm
+RUN export JAVA_HOME
+RUN echo $JAVA_HOME
 USER root
 
 ENV POSTGRES_HOST_AUTH_METHOD=trust
@@ -35,7 +38,8 @@ ENV POSTGRES_DB dbname
 WORKDIR /WORDS
 RUN /usr/share/maven/bin/mvn verify
 
-#COPY /db/words.sql /docker-entrypoint-initdb.d/words.sql
+WORKDIR /docker-entrypoint-initdb.d/
+COPY /db/words.sql /docker-entrypoint-initdb.d/words.sql
 RUN /usr/lib/postgresql/15/bin/psql words.sql
 
 # Exponer el puerto 5432 para la base de datos de PostgreSQL
@@ -44,9 +48,6 @@ EXPOSE 80
 EXPOSE 5432
 
 # Copiar el binario ejecutable de la aplicación desde la imagen de Golang
-
-# Ejecutar la aplicación y conectarse a la base de datos de PostgreSQL
-#WORKDIR /
 
 # Compilar la aplicación Go y empaquetarla como un binario ejecutable
 RUN /usr/local/go build dispatcher.go
