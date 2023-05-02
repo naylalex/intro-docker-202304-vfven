@@ -1,0 +1,1 @@
+2023/04/25 01:20:05 [emerg] 7#7: open() "/run/nginx/nginx.pid" failed (2: No such file or directory)
